@@ -6,7 +6,6 @@ import java.util.Scanner;
 public class Game {
     public static Scanner sc;
     String[][] playBoard;
-    Boolean[][] shownArray;
     boolean running;
     Minefield minefield;
     int hitX, hitY;
@@ -19,15 +18,24 @@ public class Game {
         running = true;
         this.minefield = minefield;
         sc = Minefield.sc;
-        shownArray = new Boolean[minefield.a][minefield.b];
-        shownArray = fillPlayBoard(shownArray);
+
         createAndFillPlayBoard();
         drawPlayBoard();
         playTurn();
     }
 
     public void playTurn() {
+        if (running&&iterCount==0){
+            iterCount++;
+            inputHitCoords();
+            minefield.populateWithMinesSpecified(minefield.minesNum, hitX, hitY);
+            changePlayBoardOnHit();
+            System.out.flush();
+            drawPlayBoard();
+            playTurn();
+        }
         if (running){
+            iterCount++;
             inputHitCoords();
             changePlayBoardOnHit();
             System.out.flush();
@@ -39,7 +47,7 @@ public class Game {
     }
 
     public void inputHitCoords() {
-        iterCount = 0;
+        //iterCount = 0;
         System.out.print("HitX: ");
         hitX = sc.nextInt();
         System.out.print("HitY");
@@ -50,20 +58,20 @@ public class Game {
     public String[][] fillPlayBoard(String[][] playBoard) {
         for (int i = 0; i < playBoard.length; i++) {
             for (int j = 0; j < playBoard.length; j++) {
-                playBoard[i][j] = "*";
+                playBoard[i][j] = " * ";
             }
         }
         return playBoard;
     }
 
-    public Boolean[][] fillPlayBoard(Boolean[][] playBoard) {
+    /*public Boolean[][] fillPlayBoard(Boolean[][] playBoard) {
         for (int i = 0; i < playBoard.length; i++) {
             for (int j = 0; j < playBoard.length; j++) {
                 playBoard[i][j] = false;
             }
         }
         return playBoard;
-    }
+    }*/
 
     public void createAndFillPlayBoard() {
         playBoard = new String[minefield.a][minefield.b];
@@ -125,7 +133,7 @@ public class Game {
 
         int minesNear = numberOfNearbyMinesOnTile(hitX - 1, hitY - 1);
         if ((minesNear < 500)) {
-            playBoard[hitY - 1][hitX - 1] = Integer.toString(minesNear);
+            playBoard[hitY - 1][hitX - 1] = " " + minesNear + " ";
         }
         if (minesNear == 0) {
             lookThroughTheSurroundingTilesAndShowThem(hitX - 1, hitY - 1);
@@ -133,10 +141,11 @@ public class Game {
 
         if (minesNear > 500) {
             showTheWholeGame();
+            running=false;
         }
         for (int i = 0; i < playBoard.length; i++) {
             lookThroughGameArrayForZeroAndShowSurroundings();
-            running=false;
+
         }
 
     }
@@ -161,7 +170,7 @@ public class Game {
                 if (xChange != 0 || yChange != 0) {
                     if (x + xChange >= 0 && y + yChange >= 0 && x + xChange < playBoard.length && y + yChange < playBoard.length) {
                         int minesNearNearby = numberOfNearbyMinesOnTile(x + xChange, y + yChange);
-                        playBoard[y + yChange][x + xChange] = Integer.toString(minesNearNearby);
+                        playBoard[y + yChange][x + xChange] = " " + minesNearNearby + " ";
                     }
 
                 }
@@ -172,7 +181,7 @@ public class Game {
     public void lookThroughGameArrayForZeroAndShowSurroundings() {
         for (int i = 0; i < playBoard.length; i++) {
             for (int j = 0; j < playBoard.length; j++) {
-                if (Objects.equals(playBoard[j][i], "0")) {
+                if (Objects.equals(playBoard[j][i], " 0 ")) {
                     lookThroughTheSurroundingTilesAndShowThem(i, j);
                 }
             }
